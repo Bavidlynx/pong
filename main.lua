@@ -21,10 +21,13 @@ function love.load()
 
     scoreFont = love.graphics.newFont('font.TTF', 30)
 
+    victoryFont = love.graphics.newFont('font.TTF', 40)
+
     player1Score = 0
     player2Score = 0
 
     servingPlayer = math.random(2) == 1 and 1 or 2
+    winningPlayer = 0
 
 
     Paddle1 = Paddle(5, 20, 5, 25)
@@ -51,14 +54,24 @@ function love.update(dt)
         player2Score = player2Score + 1
         servingPlayer = 1
         ball:reset()
-        gameState = 'serve'
+        if player2Score >= 3 then
+            gameState = 'victory'
+            winningPlayer = 2
+        else
+            gameState = 'serve'
+        end
     end
 
     if ball.x >= VIRTUAL_WIDTH - 5 then
         player1Score = player1Score + 1
         servingPlayer = 2
         ball:reset()
-        gameState = 'serve'
+        if player1Score >= 3 then
+            gameState = 'victory'
+            winningPlayer = 1
+        else
+            gameState = 'serve'
+        end
     end
 
     if ball:collides(Paddle1) then
@@ -115,6 +128,8 @@ function love.keypressed(key)
         elseif gameState == 'serve' then
             gameState = 'play'
             ball:reset()
+        elseif gameState == 'victory' then
+            gameState = 'start' 
         end
     end
 
@@ -139,8 +154,15 @@ function love.draw()
         love.graphics.printf('Player ' .. tostring(servingPlayer) .. "'s serve!", 
             0, 10, VIRTUAL_WIDTH, 'center')
         love.graphics.printf("Press Enter To Serve", 0, 20, VIRTUAL_WIDTH, 'center')
-    end
     
+    elseif gameState == 'victory' then
+        love.graphics.setFont(victoryFont)
+        love.graphics.printf("Palyer" .. tostring(winningPlayer) .. " won!", 0, 135, VIRTUAL_WIDTH, 'center')
+        love.graphics.setFont(smallFont)
+        love.graphics.printf("Press Enter To Reset", 0, 20, VIRTUAL_WIDTH, 'center')
+    elseif gameState == 'play' then
+    
+    end
 
     love.graphics.setFont(smallFont)
 
