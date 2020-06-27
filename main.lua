@@ -18,10 +18,14 @@ function love.load()
     love.graphics.setDefaultFilter('nearest', 'nearest')
 
     smallFont = love.graphics.newFont('font.TTF', 8)
-
     scoreFont = love.graphics.newFont('font.TTF', 30)
-
     victoryFont = love.graphics.newFont('font.TTF', 40)
+
+    sounds = {
+        ['Paddle_hit'] = love.audio.newSource('paddle_hit.wav', 'static'),
+        ['wall_hit'] = love.audio.newSource('wall_hit.wav', 'static'),
+        ['point_scored'] = love.audio.newSource('point_scored.wav', 'static')
+    }
 
     player1Score = 0
     player2Score = 0
@@ -44,8 +48,12 @@ function love.load()
     push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
         fullscreen = false,
         vsync = true,
-        resizable = false
+        resizable = true
     })
+end
+
+function love.resize(w, h)
+    push:resize(w, h)
 end
 
 function love.update(dt)
@@ -53,6 +61,9 @@ function love.update(dt)
     if ball.x <= 0 then
         player2Score = player2Score + 1
         servingPlayer = 1
+
+        sounds['point_scored']:play()
+
         ball:reset()
         if player2Score >= 3 then
             gameState = 'victory'
@@ -65,6 +76,9 @@ function love.update(dt)
     if ball.x >= VIRTUAL_WIDTH - 5 then
         player1Score = player1Score + 1
         servingPlayer = 2
+
+        sounds['point_scored']:play()
+
         ball:reset()
         if player1Score >= 3 then
             gameState = 'victory'
@@ -76,19 +90,29 @@ function love.update(dt)
 
     if ball:collides(Paddle1) then
         ball.dx = -ball.dx
+        
+        sounds['Paddle_hit']:play()
     end
+
 
     if ball:collides(Paddle2) then
         ball.dx = -ball.dx
+
+        sounds['Paddle_hit']:play()
     end
 
     if ball.y <= 0 then
         ball.dy = -ball.dy
+
+        sounds['wall_hit']:play()
     end
+
 
     if ball.y >= VIRTUAL_HEIGHT - 4 then
         ball.dy = -ball.dy
         ball.y = VIRTUAL_HEIGHT - 4
+
+        sounds['wall_hit']:play()
     end
 
     Paddle1:update(dt)
@@ -130,6 +154,8 @@ function love.keypressed(key)
             ball:reset()
         elseif gameState == 'victory' then
             gameState = 'start' 
+            player1Score = 0
+            player2Score = 0
         end
     end
 
